@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import History from './src/components/History';
-import {add} from './src/redux/slices/Todo';
-import {useDispatch, useSelector} from 'react-redux';
+import {add} from './src/redux/slices/Todo'; // Importing action creator 'add' from Redux slice
+import {useDispatch, useSelector} from 'react-redux'; // Importing useDispatch and useSelector hooks from react-redux
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   TextInput,
@@ -24,11 +24,14 @@ import {
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import DatePicker from 'react-native-date-picker';
 import moment from 'moment';
+import CategoryDropdownList from './src/components/CategoryDropdownList';
+import GradientBox from './src/components/GradientBox';
+import ButtonTransaction from './src/components/ButtonTransaction';
 
 const App = () => {
-  const dispatch = useDispatch();
-  const todo = useSelector(state => state.todo.todos);
+  const dispatch = useDispatch(); // Initializing useDispatch hook
 
+  // State variables
   const [balance, setBalance] = useState(0);
   const [greater, setGreater] = useState(0);
   const [less, setLess] = useState(0);
@@ -37,7 +40,21 @@ const App = () => {
   const [selectCategory, setSelectCategory] = useState('');
   const [date, setDate] = useState('');
   const [open, setOpen] = useState(false);
+  // Function to handle category item press
+  const [expanded, setExpanded] = React.useState(false);
 
+  const handleItemPress = item => {
+    setSelectCategory(item);
+    handlePress();
+  };
+
+  // Function to handle accordion press
+  const handlePress = () => setExpanded(!expanded);
+
+  // State variable for radio button
+  const [checked, setChecked] = React.useState(false);
+
+  // useEffect to load data from AsyncStorage when component mounts
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -45,7 +62,7 @@ const App = () => {
         if (storedTransactions !== null) {
           const parsedTransactions = JSON.parse(storedTransactions);
 
-          parsedTransactions.forEach(item => dispatch(add(item)));
+          parsedTransactions.forEach(item => dispatch(add(item))); // Dispatching Redux action to add transactions
 
           setTransactions(JSON.parse(storedTransactions));
         }
@@ -57,6 +74,7 @@ const App = () => {
     loadData();
   }, []);
 
+  // useEffect to update balance and totals when transactions change
   useEffect(() => {
     const AccountBalance = () => {
       // Recalculate total income (greater) and total expenses (less)
@@ -83,13 +101,14 @@ const App = () => {
     AccountBalance();
   }, [transactions]);
 
+  // Function to handle text input change
   const onChangeText = (key, val) => {
     setNumber(val);
-
-    // setNumber(val);
   };
+
+  // Function to handle button press to add transaction
   const onPress = async () => {
-    Keyboard.dismiss()
+    Keyboard.dismiss();
     const regex = /^(?!0\d)([1-9]\d*|0)(\.\d{2})?$/;
     if (!regex.test(number) && number !== '') {
       // Display an alert if the input is not numeric
@@ -104,6 +123,9 @@ const App = () => {
         };
         const updatedTransactions = [...transactions, newTransaction];
         setTransactions(updatedTransactions);
+        setNumber('');
+        setSelectCategory('');
+        setDate('');
         try {
           ToastAndroid.show('Add transaction successful', ToastAndroid.SHORT);
           await AsyncStorage.setItem(
@@ -113,7 +135,7 @@ const App = () => {
         } catch (error) {
           console.error('Error saving data:', error);
         }
-        dispatch(add(newTransaction));
+        dispatch(add(newTransaction)); // Dispatching Redux action to add transaction
 
         // Calculate the new balance
         let totalBalance = 0;
@@ -121,74 +143,39 @@ const App = () => {
           totalBalance += parseInt(item.number);
         });
         setBalance(totalBalance);
-
-        setNumber('');
-        setSelectCategory('');
-        setDate('');
       }
     }
   };
-  const [expanded, setExpanded] = React.useState(false);
-  const handleItemPress = item => {
-    setSelectCategory(item);
-    handlePress();
-  };
-  const handlePress = () => setExpanded(!expanded);
-  const [checked, setChecked] = React.useState(false);
 
   return (
-    <SafeAreaProvider style={{flex: 1}}>
+    <SafeAreaProvider style={styles.container}>
+    
+    {/* onTop status Bar */}
       <StatusBar
         animated={true}
         backgroundColor="#4c669f"
         barStyle={'light-content'}
       />
+      {/* onTop header */}
       <LinearGradient
         colors={['#4c669f', '#3b5998', '#192f6a']}
-        style={{
-          height: 60,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        <Text style={{fontSize: 25, color: '#fff', fontWeight: 'bold'}}>
-          FinanceTracker
-        </Text>
+        style={styles.dashBoard}>
+        <Text style={styles.dashBoardTxt}>FinanceTracker</Text>
       </LinearGradient>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}>
         <View style={styles.innerContainer}>
-          
+          {/* Box Gradient component */}
+          <GradientBox greater={greater} less={less} />
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: 10,
-            }}>
-            <LinearGradient
-              style={{borderRadius: 10}}
-              colors={['#4c669f', '#3b5998', '#192f6a']}
-              >
-              <View style={styles.box}>
-                <Text style={styles.txtBox}>INCOME</Text>
-                <Text style={styles.txtBox}>Rs {greater}</Text>
-              </View>
-            </LinearGradient>
-            <LinearGradient
-              style={{borderRadius: 10}}
-              colors={['#D31027', '#EA384D','#EA384D']}>
-              <View style={styles.box}>
-                <Text style={styles.txtBox}>EXPENSE</Text>
-                <Text style={styles.txtBox}>Rs {less}</Text>
-              </View>
-            </LinearGradient>
-          </View>
+          {/* Displaying total balance */}
           <View>
-          <Text style={styles.txt}>Balance: Rs {balance}</Text>
-        </View>
+            <Text style={styles.txt}>Balance: Rs {balance}</Text>
+          </View>
+
+          {/* Input for amount */}
           <Text style={[styles.amountTransaction]}>Amount:</Text>
           <TextInput
             Type={'outlined'}
@@ -200,104 +187,19 @@ const App = () => {
             keyboardType="number-pad"
             mode="outlined"
           />
+          {/* Displaying category selection if it's not an income transaction */}
 
+          {/* Category List component */}
           {!checked && (
-            <View style={styles.categoryMainView}>
-              <Text style={[styles.txtTransaction]}>Category:</Text>
-
-              <List.Accordion
-                style={styles.listAction}
-                title={
-                  selectCategory !== '' ? selectCategory : 'select category'
-                }
-                left={props => (
-                  <List.Icon
-                    {...props}
-                    icon={
-                      selectCategory === 'Utilities'
-                        ? 'home'
-                        : selectCategory === 'Groceries'
-                        ? 'cart'
-                        : selectCategory === 'Rent'
-                        ? 'home-account'
-                        : 'folder'
-                    }
-                  />
-                )}
-                expanded={expanded}
-                onPress={handlePress}>
-                <List.Item
-                  left={() => (
-                    <List.Icon
-                      color={
-                        selectCategory === 'Utilities' ? '#674fa3' : '#000000'
-                      }
-                      icon="home"
-                    />
-                  )}
-                  title="Utilities"
-                  titleStyle={{
-                    color:
-                      selectCategory === 'Utilities' ? '#674fa3' : '#000000',
-                  }}
-                  onPress={() => handleItemPress('Utilities')}
-                  style={{marginLeft: 10}}
-                />
-                <View
-                  style={{
-                    borderBottomColor: '#747474',
-                    borderBottomWidth: 1,
-                    marginHorizontal: 10,
-                  }}
-                />
-                <List.Item
-                  left={() => (
-                    <List.Icon
-                      color={
-                        selectCategory === 'Groceries' ? '#674fa3' : '#000000'
-                      }
-                      icon="cart"
-                    />
-                  )}
-                  title="Groceries"
-                  onPress={() => handleItemPress('Groceries')}
-                  titleStyle={{
-                    color:
-                      selectCategory === 'Groceries' ? '#674fa3' : '#000000',
-                  }}
-                  style={{marginLeft: 10}}
-                />
-                <View
-                  style={{
-                    borderBottomColor: '#747474',
-                    borderBottomWidth: 1,
-                    marginHorizontal: 10,
-                  }}
-                />
-                <List.Item
-                  left={() => (
-                    <List.Icon
-                      color={selectCategory === 'Rent' ? '#674fa3' : '#000000'}
-                      icon="home-account"
-                    />
-                  )}
-                  title="Rent"
-                  onPress={() => handleItemPress('Rent')}
-                  titleStyle={{
-                    color: selectCategory === 'Rent' ? '#674fa3' : '#000000',
-                  }}
-                  style={{marginLeft: 10}}
-                />
-                <View
-                  style={{
-                    borderBottomColor: '#747474',
-                    borderBottomWidth: 1,
-                    marginHorizontal: 10,
-                  }}
-                />
-              </List.Accordion>
-            </View>
+            <CategoryDropdownList
+              selectCategory={selectCategory}
+              expanded={expanded}
+              handlePress={handlePress}
+              handleItemPress={handleItemPress}
+            />
           )}
+          {/* Date selection */}
+
           <Text style={[styles.selectDate]}>Choose a date:</Text>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -314,6 +216,8 @@ const App = () => {
               {date !== '' ? moment(date).format('DD/MM/YYYY') : 'Select Date'}
             </Text>
           </TouchableOpacity>
+          {/* Date picker library */}
+
           <DatePicker
             modal
             open={open}
@@ -327,6 +231,7 @@ const App = () => {
               setOpen(false);
             }}
           />
+          {/* Radio buttons for expense/income */}
           <View style={styles.radioButtonView}>
             <TouchableOpacity
               activeOpacity={0.7}
@@ -349,22 +254,10 @@ const App = () => {
               <Text style={styles.radioTxt}>Income</Text>
             </TouchableOpacity>
           </View>
-
-          <LinearGradient
-            colors={['#4c669f', '#3b5998', '#192f6a']}
-            style={{marginTop: 5, borderRadius: 10}}>
-            <TouchableRipple
-              rippleColor="rgba(0, 0, 0, .32)"
-              style={styles.btn}
-              activeOpacity={0.6}
-              onPress={onPress}>
-              <Text style={styles.addBtn}>Add Transaction</Text>
-            </TouchableRipple>
-          </LinearGradient>
-
-          <Text style={[styles.txtTransaction, {marginTop: 20, fontSize: 25}]}>
-            Transaction
-          </Text>
+          <ButtonTransaction onPress={onPress} />
+          {/* Header for transaction history */}
+          <Text style={[styles.txtTransaction3]}>Transaction</Text>
+          {/* Transaction history component */}
           <History />
         </View>
       </ScrollView>
@@ -400,26 +293,13 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
   },
-  btn: {
-    padding: 15,
-    alignItems: 'center',
-  },
+
   txt: {
     fontSize: 25,
     fontWeight: 'bold',
-    marginTop:10
+    marginTop: 10,
   },
-  box: {
-    borderRadius: 50,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    width:150
-  },
-  txtBox: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
+
   txtTransaction: {
     fontSize: 15,
     color: '#000',
@@ -442,16 +322,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
   },
-  addBtn: {
-    color: '#fff',
+  txtTransaction3: {
+    marginTop: 20,
+    fontSize: 25,
+    color: '#000',
     fontWeight: 'bold',
-    fontSize: 15,
   },
-  listAction: {
-    backgroundColor: '#74747440',
-    height: 55,
-    borderRadius: 10,
-  },
+
   radioButtonView: {
     flexDirection: 'row',
     alignSelf: 'center',
@@ -468,9 +345,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: 'bold',
   },
-  categoryMainView: {
-    marginTop: 20,
-  },
+
   DateBtn: {
     borderWidth: 1,
     borderColor: '#747474',
@@ -484,5 +359,22 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 15,
     fontWeight: '600',
+  },
+  dashBoard: {
+    height: 60,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dashBoardTxt: {
+    fontSize: 25,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  line: {
+    borderBottomColor: '#747474',
+    borderBottomWidth: 1,
+    marginHorizontal: 10,
   },
 });
