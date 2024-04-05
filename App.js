@@ -172,7 +172,7 @@ const App = () => {
 
           {/* Displaying total balance */}
           <View>
-            <Text style={styles.txt}>Balance: Rs {balance}</Text>
+            <Text style={styles.txt}> Balance: Rs {balance}</Text>
           </View>
 
           {/* Input for amount */}
@@ -180,7 +180,7 @@ const App = () => {
           <TextInput
             Type={'outlined'}
             label={'Enter Amount'}
-            maxLength={10}
+            maxLength={12}
             style={styles.input}
             onChangeText={val => onChangeText('number', val)}
             value={number}
@@ -258,7 +258,7 @@ const App = () => {
           {/* Header for transaction history */}
           <Text style={[styles.txtTransaction3]}>Transaction</Text>
           {/* Transaction history component */}
-          <History />
+          <History setTransactions={setTransactions} />
         </View>
       </ScrollView>
     </SafeAreaProvider>

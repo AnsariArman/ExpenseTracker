@@ -7,59 +7,48 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {useSelector} from 'react-redux';
-import {add, deleted} from '../redux/slices/Todo';
+import {useDispatch, useSelector} from 'react-redux';
+import {deleted} from '../redux/slices/Todo'; // Importing Redux actions
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 
-const History = () => {
+const History = ({setTransactions}) => {
+  const dispatch = useDispatch(); // Initializing useDispatch hook
+
   const todo = useSelector(state => state.todo.todos);
-  // const flattenedTodos =todo &&  todo.reduce((acc, curr) => acc.concat(curr), []);
-  //   const onDelete = id => {
-  //     console.log("🚀 ~ onDelete ~ id:", id)
-  //     // const ans = todo.filter(item => {
-  //     //   return item.id !== id;
-  //     // });
-  //     dispatch(deleted(id));
-  //   };
-  // // Function to delete a transaction by ID
-  // const deleteTransactionById = async (idToDelete) => {
-  //   try {
-  //     // Retrieve the array of transactions from AsyncStorage
-  //     const storedTransactions = await AsyncStorage.getItem('transactions');
-  //     if (storedTransactions !== null) {
-  //       // Parse the stored transactions
-  //       const transactions = JSON.parse(storedTransactions);
-  //       // Filter out the transaction with the specified ID
-  //       const updatedTransactions = transactions.filter(transaction => transaction.id !== idToDelete.id);
-  //       // Save the updated transactions back to AsyncStorage
-  //       try {
-  //         await AsyncStorage.setItem(
-  //           'transactions',
-  //           JSON.stringify(updatedTransactions),
-  //         );
-  //         ToastAndroid.show('Add transaction successful', ToastAndroid.SHORT);
-  //       } catch (error) {
-  //         console.error('Error saving data:', error);
-  //       }
-  //       // const storedTransactions = await AsyncStorage.getItem('transactions');
-  //       // console.log("🚀 ~ deleteTransactionById ~ storedTransactions:", updatedTransactions)
-  //       // dispatch(add(JSON.parse(storedTransactions)));
 
-  //       // dispatch(add(storedTransactions));
-  //       // Dispatch the 'deleted' action to update Redux state
-  //       // dispatch(deleted(idToDelete));
+  // Function to delete a transaction by ID
+  const deleteTransactionById = async idToDelete => {
+    try {
+      // Retrieve the array of transactions from AsyncStorage
+      const storedTransactions = await AsyncStorage.getItem('transactions');
+      if (storedTransactions !== null) {
+        // Parse the stored transactions
+        const transactions = JSON.parse(storedTransactions);
+        // Filter out the transaction with the specified ID
+        const updatedTransactions = transactions.filter(
+          transaction => transaction.id !== idToDelete,
+        );
+        // Save the updated transactions back to AsyncStorage
+        try {
+          await AsyncStorage.setItem(
+            'transactions',
+            JSON.stringify(updatedTransactions),
+          );
+          ToastAndroid.show('Add transaction successful', ToastAndroid.SHORT);
+        } catch (error) {
+          console.error('Error saving data:', error);
+        }
+        // Dispatching the delete action
+        dispatch(deleted(idToDelete));
+        // remaining transactions
+        setTransactions(updatedTransactions);
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
+  };
 
-  //       console.log('Transaction deleted successfully');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error deleting transaction:', error);
-  //   }
-  // };
-
-  // <Image
-  // style={styles.deleteIcon}
-  // source={require('../Image/delete.png')} />
   return (
     <View>
       <View style={styles.line} />
@@ -68,35 +57,48 @@ const History = () => {
         <Text style={[styles.table, styles.addLIst]}>Category</Text>
         <Text style={styles.table}>Amount</Text>
       </LinearGradient>
+
       <View style={styles.tableMenu}>
-        {todo !== undefined &&
-          todo.map(item => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  // onDelete(item.id)
-                  // deleteTransactionById(item)
-                }}
-                key={item.id}
-                style={[styles.task, styles.shadow]}>
-                <View style={styles.line} />
-                <View style={styles.flex}>
-                  <Text style={styles.date}>{item.date}</Text>
-                  <Text style={styles.category}>{item.text}</Text>
-                  <Text
-                    numberOfLines={2}
-                    style={[
-                      {
-                        color: item.number < 0 ? 'red' : 'green',
-                      },
-                      styles.number,
-                    ]}>
-                    {`Rs ${item.number}`}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+        {todo.length > 0 ? (
+           // If there are todos, render them, otherwise show a message
+          <>
+            {todo !== undefined &&
+              todo.map(item => {
+                return (
+                  <View key={item.id} style={[styles.task, styles.shadow]}>
+                    <View style={styles.line} />
+                    <View style={styles.flex}>
+                      <Text style={styles.date}>{item.date}</Text>
+                      <Text style={styles.category}>{item.text}</Text>
+                      <Text
+                        numberOfLines={2}
+                        style={[
+                          {
+                            color: item.number < 0 ? 'red' : 'green',
+                          },
+                          styles.number,
+                        ]}>
+                        {`Rs ${item.number}`}
+                      </Text>
+                      <TouchableOpacity
+                        hitSlop={styles.hitSlopStyles}
+                        onPress={() => {
+                          deleteTransactionById(item.id);
+                        }}>
+                        <Image
+                          style={styles.deleteIcon}
+                          source={require('../Image/delete.png')}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+          </>
+        ) : (
+          // Message when no transactions are found
+          <Text style={styles.foundTxt}>no transaction found</Text>
+        )}
       </View>
     </View>
   );
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     marginTop: 10,
     flexDirection: 'row',
-    paddingHorizontal: 25,
+    paddingHorizontal: 30,
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: -2,
@@ -140,8 +142,6 @@ const styles = StyleSheet.create({
   },
   task: {
     height: 50,
-
-    // marginTop: 20,
     backgroundColor: '#fff',
   },
   shadow: {
@@ -174,12 +174,13 @@ const styles = StyleSheet.create({
   number: {
     fontSize: 12,
     fontWeight: '500',
-    width: '22%',
+    marginRight: -40,
+    width: '20%',
   },
 
   deleteIcon: {
-    height: 10,
-    width: 10,
+    height: 14,
+    width: 14,
   },
   line: {
     borderBottomColor: 'gray',
@@ -188,5 +189,18 @@ const styles = StyleSheet.create({
   },
   addLIst: {
     marginLeft: 10,
+  },
+  foundTxt: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#000000',
+    marginTop: 10,
+  },
+  hitSlopStyles: {
+    right: 5,
+    left: 5,
+    top: 5,
+    bottom: 5,
   },
 });
