@@ -35,7 +35,7 @@ const History = ({setTransactions}) => {
             'transactions',
             JSON.stringify(updatedTransactions),
           );
-          ToastAndroid.show('Add transaction successful', ToastAndroid.SHORT);
+          ToastAndroid.show('Transaction deleted successfully', ToastAndroid.SHORT);
         } catch (error) {
           console.error('Error saving data:', error);
         }

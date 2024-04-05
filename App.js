@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ToastAndroid,
-  Button,
   StatusBar,
   Keyboard,
 } from 'react-native';
@@ -125,7 +124,7 @@ const App = () => {
         setSelectCategory('');
         setDate('');
         try {
-          ToastAndroid.show('Add transaction successful', ToastAndroid.SHORT);
+          ToastAndroid.show('Transaction added successfully', ToastAndroid.SHORT);
           await AsyncStorage.setItem(
             'transactions',
             JSON.stringify(updatedTransactions),

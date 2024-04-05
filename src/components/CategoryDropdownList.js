@@ -10,6 +10,7 @@ const CategoryDropdownList = ({selectCategory,expanded,handlePress,handleItemPre
 
     <List.Accordion
       style={styles.listAction}
+      
       title={
         selectCategory !== '' ? selectCategory : 'select category'
       }
@@ -23,7 +24,7 @@ const CategoryDropdownList = ({selectCategory,expanded,handlePress,handleItemPre
               ? 'cart'
               : selectCategory === 'Rent'
               ? 'home-account'
-              : 'folder'
+              : selectCategory === 'Entertainment'? 'movie': 'folder'
           }
         />
       )}
@@ -81,6 +82,22 @@ const CategoryDropdownList = ({selectCategory,expanded,handlePress,handleItemPre
         style={styles.dropdownPadding}
       />
       <View style={styles.line} />
+      {/* Entertainment category */}
+      <List.Item
+      left={() => (
+        <List.Icon
+          color={selectCategory === 'Entertainment' ? '#674fa3' : '#000000'}
+          icon="movie"
+        />
+      )}
+      title="Entertainment"
+      onPress={() => handleItemPress('Entertainment')}
+      titleStyle={{
+        color: selectCategory === 'Entertainment' ? '#674fa3' : '#000000',
+      }}
+      style={styles.dropdownPadding}
+    />
+    <View style={styles.line} />
     </List.Accordion>
   </View>
   )
@@ -102,6 +119,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#74747440',
         height: 55,
         borderRadius: 10,
+        paddingTop:5
       },
       line: {
         borderBottomColor: '#747474',
