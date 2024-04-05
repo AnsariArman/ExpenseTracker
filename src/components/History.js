@@ -55,7 +55,7 @@ const History = ({setTransactions}) => {
       <LinearGradient colors={['#4c669f', '#3b5998']} style={styles.card}>
         <Text style={styles.table}>Date</Text>
         <Text style={[styles.table, styles.addLIst]}>Category</Text>
-        <Text style={styles.table}>Amount</Text>
+        <Text style={styles.tableAmount}>Amount</Text>
       </LinearGradient>
 
       <View style={styles.tableMenu}>
@@ -140,6 +140,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
+  tableAmount:{
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
   task: {
     height: 50,
     backgroundColor: '#fff',
@@ -174,7 +179,7 @@ const styles = StyleSheet.create({
   number: {
     fontSize: 12,
     fontWeight: '500',
-    marginRight: -40,
+    marginRight: -50,
     width: '20%',
   },
 

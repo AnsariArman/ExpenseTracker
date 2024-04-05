@@ -13,12 +13,10 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import History from './src/components/History';
 import {add} from './src/redux/slices/Todo'; // Importing action creator 'add' from Redux slice
-import {useDispatch, useSelector} from 'react-redux'; // Importing useDispatch and useSelector hooks from react-redux
+import {useDispatch} from 'react-redux'; // Importing useDispatch and useSelector hooks from react-redux
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   TextInput,
-  List,
-  TouchableRipple,
   RadioButton,
 } from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
@@ -143,6 +141,9 @@ const App = () => {
           totalBalance += parseInt(item.number);
         });
         setBalance(totalBalance);
+      } else{
+        ToastAndroid.show('Please fill in all fields', ToastAndroid.LONG);
+
       }
     }
   };
@@ -202,8 +203,9 @@ const App = () => {
 
           <Text style={[styles.selectDate]}>Choose a date:</Text>
           <TouchableOpacity
-            activeOpacity={0.7}
+          activeOpacity={0.3}
             onPress={() => {
+              
               Keyboard.dismiss();
               setOpen(true);
             }}

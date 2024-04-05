@@ -1,4 +1,4 @@
-This is a financial tracking application built using React Native, Redux, and Material UI components. The app allows users to track their income and expenses by adding transactions with a category, amount, and date. The app also displays the total balance, total income, and total expenses.
+This is a financial tracking application built using React Native, Redux, and Material UI components. The app allows users to track their income and expenses by adding transactions with a category, amount, date , and delete transaction history. The app also displays the total balance, total income, and total expenses.
 
 Functionalities:
 
